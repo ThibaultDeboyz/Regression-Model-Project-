@@ -1,0 +1,175 @@
+---
+title: "Regression Model Project"
+author: "Thibault Dubois"
+date: "18 mars 2018"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Executive Summary
+
+You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+*Question 1:*
+“Is an automatic or manual transmission better for MPG”
+
+*Question 2:* 
+"Quantify the MPG difference between automatic and manual transmissions"
+
+After analyzing the data, we arrive to the following conclusions:
+
+*Answer 1:*
+Manual transmissions perform better than automatic transmissions by 7.25MPG, however this single factor only accounts for 36% of the explanation
+
+*Answer 2:*
+When measuring MPG, manual transmissions provide an additional 1.48MPG of performance over automatic transmissions when taking into account three additonal explanatory variables (cylinders, horsepower & weight), these additional factors account for 85% of the explanation
+
+#Exploratory Data Analysis
+
+###Loading the data and observing the data set:
+```{r}
+library(datasets)
+data(mtcars)
+```
+
+```{r}
+head(mtcars, 3)
+```
+
+```{r}
+str(mtcars)
+```
+
+###Further exploration of the data set
+
+```{r}
+summary(mtcars$mpg)
+```
+We see that the median and the mean of mpg are close to each other, suggesting a normal distribution. Plotting the data will give a better view on the data. 
+
+```{r}
+library(ggplot2)
+ggplot(data = mtcars, aes(x = mpg))+geom_histogram(binwidth = 3)
+```
+This graph suggests that the data for mpg is slightly rightly skewed. 
+
+We would also like to see how mpg changes when controlled for autmatic transmission versus manual transmission. Boxplots are a good way to show the relationships between numerical and categorical variables
+```{r}
+#Visualization ~ Automatic vs Manual Transmission:
+library(ggplot2)
+mtcars$am <- as.factor(mtcars$am)
+Trans_Type <- ggplot(aes(x=am, y=mpg), data=mtcars) + geom_boxplot(aes(fill=am))
+Trans_Type <- Trans_Type + labs(title = "Automatic vs Manual Transmission")
+Trans_Type <- Trans_Type + xlab("Transmission Type")
+Trans_Type <- Trans_Type + ylab("MPG")
+Trans_Type <- Trans_Type + labs(fill = "Legend (0=AT, 1=MT)")
+Trans_Type
+```
+This boxplot is a first indication of the drivers behind mpg. We clearly see that automatic transmissions are consume on average less than manual transmissions. 
+
+Lets review the summary statistics but this time split between the two groups.
+
+```{r}
+Trans_Stats = split(mtcars$mpg, mtcars$am)
+```
+
+The mean:
+```{r}
+sapply(Trans_Stats, mean)
+```
+
+The standard deviation: 
+```{r}
+sapply(Trans_Stats, sd)
+```
+
+The maximum and the minimum
+```{r}
+sapply(Trans_Stats, range)
+```
+Looking at the summary statistics
+
+
+#Hypothesis testing
+We would like to formally test wether there is a significant difference between automatic and manual transmissions in terms of mpg. In order to do this the following t-test has been executed:
+
+```{r}
+Auto_trans <- mtcars[mtcars$am == "0",]
+Man_trans <- mtcars[mtcars$am == "1",]
+t.test(Auto_trans$mpg, Man_trans$mpg)
+```
+P-value being smaller than 5% we can safely conclude that there is a signficant difference between manual transmissions and automatic transmissions. Automatic transmissions consume significantly less than manual transmissions. Now we would like to exactly measure this difference through linear regressions.  
+
+#Linear Regression Model
+
+###Single regressor model
+First, I conduct a regression with only the am variable:
+```{r}
+Model1 <- lm(mpg ~ am, data = mtcars)
+summary(Model1)
+```
+*Interpreation*
+Automatic transmission: the mean mpg consumed is equal to 17.147 mpg
+Manual transmission: the mean mpg consumed is qual to 17.147 mpg + 7.245 mpg = 24.392 mpg.
+In other words manual tranmission consumed on average 7.245 mpg *more* than automatic transmission. 
+
+However, when we look at adjusted R² we see that the model only explains 33.85% of the variation in the observations. We can try to get a more accurate and parsimonuous model by adding extra variables. 
+
+
+We find the same results (with a slightly different interpreation) when exluding the intercept. Here we see the means when compared to 0.
+```{r}
+Model1.1 <- lm(mpg ~ am - 1, data = mtcars)
+summary(Model1.1)
+```
+
+###Multivariate regressor model
+This model looks at 4 additional regressors:
+1. Automatic versus manual transmission
+2. Cylinder type
+3. Horsepower
+4. Weight
+```{r}
+Model2 <- lm(mpg~am + cyl + hp + wt, data = mtcars)
+summary(Model2)
+```
+*Interpretation*
+F-statistic:
+The model as a whole is significant with a very high F-statistic and a low p-value.
+
+Individual P-values:
+We see that am1 is still highly significant with the intercept however we the impact of having a automatic transmission on mpg is considerably lower (from 7.245 in model 1 to 1.478 model 2). 
+
+Interesting result is weight. It appears that more weight decreases mpg which might sound counter intuitive. Weight is also signficant 
+
+Model accuracy:
+Model 2 is more accurate in explaing the variance in observation with an adjusted R² of 82.67% (as opposed to 33.85%). 
+
+We can make an additional anova test to se wether the models are significantly different from each other. In other words, we test wether adding the extra variables produces a different model. 
+```{r}
+anova(Model1, Model2)
+```
+*Interpretation*
+We reject the null hypothesis of the two models being equal. 
+
+#Appendix 
+
+This plot helps to detect wether certain variables are correlated with each other. Correlation between the regressors can bias the predictors.  
+```{r}
+pairs(mpg ~ ., data = mtcars)
+```
+We see for instance that weight and horsepower show a positive correlation. 
+
+This plot summarises the most important tests for a regression model:
+- Linearity
+- Normal distribution
+```{r}
+par(mfrow = c(2,2))
+plot(Model2)
+```
+*Interpretation*
+- We see no real pattern in the residuals so the data is homoskedastic
+- The plots follow more or less the line, suggesting the model is linear but skewed to the right
+- Some outliers have influence and leverage such as the Toyota Corolla
