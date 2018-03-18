@@ -7,18 +7,18 @@ exploring the relationship between a set of variables and miles per
 gallon (MPG) (outcome). They are particularly interested in the
 following two questions:
 
-*Question 1:* “Is an automatic or manual transmission better for MPG”
+**Question 1:** “Is an automatic or manual transmission better for MPG”
 
-*Question 2:* "Quantify the MPG difference between automatic and manual
-transmissions"
+**Question 2:** "Quantify the MPG difference between automatic and
+manual transmissions"
 
 After analyzing the data, we arrive to the following conclusions:
 
-*Answer 1:* Manual transmissions perform better than automatic
+**Answer 1:** Manual transmissions perform better than automatic
 transmissions by 7.25MPG, however this single factor only accounts for
 36% of the explanation
 
-*Answer 2:* When measuring MPG, manual transmissions provide an
+**Answer 2:** When measuring MPG, manual transmissions provide an
 additional 1.48MPG of performance over automatic transmissions when
 taking into account three additonal explanatory variables (cylinders,
 horsepower & weight), these additional factors account for 85% of the
@@ -69,6 +69,7 @@ view on the data.
     ggplot(data = mtcars, aes(x = mpg))+geom_histogram(binwidth = 3)
 
 ![](Regression_Model_files/figure-markdown_strict/unnamed-chunk-5-1.png)
+
 This graph suggests that the data for mpg is slightly rightly skewed.
 
 We would also like to see how mpg changes when controlled for autmatic
@@ -86,6 +87,7 @@ the relationships between numerical and categorical variables
     Trans_Type
 
 ![](Regression_Model_files/figure-markdown_strict/unnamed-chunk-6-1.png)
+
 This boxplot is a first indication of the drivers behind mpg. We clearly
 see that automatic transmissions are consume on average less than manual
 transmissions.
@@ -177,10 +179,12 @@ First, I conduct a regression with only the am variable:
     ## Multiple R-squared:  0.3598, Adjusted R-squared:  0.3385 
     ## F-statistic: 16.86 on 1 and 30 DF,  p-value: 0.000285
 
-*Interpreation* Automatic transmission: the mean mpg consumed is equal
-to 17.147 mpg Manual transmission: the mean mpg consumed is qual to
-17.147 mpg + 7.245 mpg = 24.392 mpg. In other words manual tranmission
-consumed on average 7.245 mpg *more* than automatic transmission.
+**Interpreation**
+
+Automatic transmission: the mean mpg consumed is equal to 17.147 mpg
+Manual transmission: the mean mpg consumed is qual to 17.147 mpg + 7.245
+mpg = 24.392 mpg. In other words manual tranmission consumed on average
+7.245 mpg *more* than automatic transmission.
 
 However, when we look at adjusted R² we see that the model only explains
 33.85% of the variation in the observations. We can try to get a more
@@ -213,8 +217,14 @@ exluding the intercept. Here we see the means when compared to 0.
 
 ### Multivariate regressor model
 
-This model looks at 4 additional regressors: 1. Automatic versus manual
-transmission 2. Cylinder type 3. Horsepower 4. Weight
+This model looks at 4 additional regressors:
+
+1.  Automatic versus manual transmission  
+2.  Cylinder type  
+3.  Horsepower  
+4.  Weight
+
+<!-- -->
 
     Model2 <- lm(mpg~am + cyl + hp + wt, data = mtcars)
     summary(Model2)
@@ -241,18 +251,23 @@ transmission 2. Cylinder type 3. Horsepower 4. Weight
     ## Multiple R-squared:  0.849,  Adjusted R-squared:  0.8267 
     ## F-statistic: 37.96 on 4 and 27 DF,  p-value: 1.025e-10
 
-*Interpretation* F-statistic: The model as a whole is significant with a
-very high F-statistic and a low p-value.
+**Interpretation**
 
-Individual P-values: We see that am1 is still highly significant with
-the intercept however we the impact of having a automatic transmission
-on mpg is considerably lower (from 7.245 in model 1 to 1.478 model 2).
+F-statistic:  
+The model as a whole is significant with a very high F-statistic and a
+low p-value.
+
+Individual P-values:  
+We see that am1 is still highly significant with the intercept however
+we the impact of having a automatic transmission on mpg is considerably
+lower (from 7.245 in model 1 to 1.478 model 2).
 
 Interesting result is weight. It appears that more weight decreases mpg
 which might sound counter intuitive. Weight is also signficant
 
-Model accuracy: Model 2 is more accurate in explaing the variance in
-observation with an adjusted R² of 82.67% (as opposed to 33.85%).
+Model accuracy:  
+Model 2 is more accurate in explaing the variance in observation with an
+adjusted R² of 82.67% (as opposed to 33.85%).
 
 We can make an additional anova test to se wether the models are
 significantly different from each other. In other words, we test wether
@@ -270,8 +285,9 @@ adding the extra variables produces a different model.
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-*Interpretation* We reject the null hypothesis of the two models being
-equal.
+**Interpretation**
+
+We reject the null hypothesis of the two models being equal.
 
 Appendix
 ========
@@ -282,6 +298,7 @@ each other. Correlation between the regressors can bias the predictors.
     pairs(mpg ~ ., data = mtcars)
 
 ![](Regression_Model_files/figure-markdown_strict/unnamed-chunk-16-1.png)
+
 We see for instance that weight and horsepower show a positive
 correlation.
 
@@ -292,7 +309,11 @@ Linearity - Normal distribution
     plot(Model2)
 
 ![](Regression_Model_files/figure-markdown_strict/unnamed-chunk-17-1.png)
-*Interpretation* - We see no real pattern in the residuals so the data
-is homoskedastic - The plots follow more or less the line, suggesting
-the model is linear but skewed to the right - Some outliers have
-influence and leverage such as the Toyota Corolla
+
+**Interpretation**
+
+-   We see no real pattern in the residuals so the data is
+    homoskedastic  
+-   The plots follow more or less the line, suggesting the model is
+    linear but skewed to the right  
+-   Some outliers have influence and leverage such as the Toyota Corolla
